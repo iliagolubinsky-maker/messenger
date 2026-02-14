@@ -1,0 +1,204 @@
+{
+	"configurations" : 
+	[
+		{
+			"abstractTargets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "Boost::atomic::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Boost__atomic-Debug-c336f25ef62fccdcd5f3.json",
+					"name" : "Boost::atomic",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "Boost::boost::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Boost__boost-Debug-122feb6f42f8fea34d2c.json",
+					"name" : "Boost::boost",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "Boost::chrono::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Boost__chrono-Debug-d5f6b2696c4192a31f0d.json",
+					"name" : "Boost::chrono",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "Boost::diagnostic_definitions::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Boost__diagnostic_definitions-Debug-ee4aefedd5f9bb8ef983.json",
+					"name" : "Boost::diagnostic_definitions",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "Boost::disable_autolinking::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Boost__disable_autolinking-Debug-9cbafd7d4d9e277f6d8d.json",
+					"name" : "Boost::disable_autolinking",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "Boost::dynamic_linking::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Boost__dynamic_linking-Debug-a70434e1cc88a8eacf94.json",
+					"name" : "Boost::dynamic_linking",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "Boost::headers::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Boost__headers-Debug-5c57defd80bf93ef777e.json",
+					"name" : "Boost::headers",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "Boost::thread::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Boost__thread-Debug-96a3f6c125b0154f612c.json",
+					"name" : "Boost::thread",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "OpenSSL::Crypto::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-OpenSSL__Crypto-Debug-30c5b6bf65d7b2bd0308.json",
+					"name" : "OpenSSL::Crypto",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "OpenSSL::SSL::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-OpenSSL__SSL-Debug-8604b6d8b70fb95ce4f9.json",
+					"name" : "OpenSSL::SSL",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "OpenSSL::applink::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-OpenSSL__applink-Debug-ac3bd181d002fe36c93f.json",
+					"name" : "OpenSSL::applink",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "SQLite::SQLite3::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-SQLite__SQLite3-Debug-5aa6311a55a89fb03c93.json",
+					"name" : "SQLite::SQLite3",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "Threads::Threads::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Threads__Threads-Debug-0d66cad244ebe038cb45.json",
+					"name" : "Threads::Threads",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "nlohmann_json::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-nlohmann_json-Debug-58152c9c16a194768316.json",
+					"name" : "nlohmann_json",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "nlohmann_json::nlohmann_json::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-nlohmann_json__nlohmann_json-Debug-29f8d8e6695538a2b17a.json",
+					"name" : "nlohmann_json::nlohmann_json",
+					"projectIndex" : 0
+				}
+			],
+			"directories" : 
+			[
+				{
+					"abstractTargetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14
+					],
+					"build" : ".",
+					"jsonFile" : "directory-.-Debug-9ad1a58d4644cf6543fa.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.21"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"abstractTargetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14
+					],
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "server",
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "server::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-server-Debug-5b4974cf209001c22d11.json",
+					"name" : "server",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/illia/messenger/build",
+		"source" : "/home/illia/messenger"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 9
+	}
+}

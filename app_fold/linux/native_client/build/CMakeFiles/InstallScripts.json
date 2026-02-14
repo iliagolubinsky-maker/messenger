@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/illia/messenger/app_fold/linux/native_client/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

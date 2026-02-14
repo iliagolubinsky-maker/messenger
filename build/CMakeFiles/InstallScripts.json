@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/illia/messenger/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

@@ -1,0 +1,3 @@
+/home/illia/messenger/build/CMakeFiles/server.dir
+/home/illia/messenger/build/CMakeFiles/edit_cache.dir
+/home/illia/messenger/build/CMakeFiles/rebuild_cache.dir

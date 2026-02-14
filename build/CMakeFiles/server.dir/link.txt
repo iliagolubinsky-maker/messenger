@@ -1,0 +1,1 @@
+/usr/bin/c++ -g -Wl,--dependency-file=CMakeFiles/server.dir/link.d CMakeFiles/server.dir/src/server.cpp.o -o bin/server  -Wl,-rpath,/usr/local/lib /usr/lib/libsqlite3.so /usr/local/lib/libboost_thread.so /usr/lib/libssl.so /usr/lib/libcrypto.so -lsodium /usr/local/lib/libboost_chrono.so /usr/local/lib/libboost_atomic.so

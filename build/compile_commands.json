@@ -1,0 +1,8 @@
+[
+{
+  "directory": "/home/illia/messenger/build",
+  "command": "/usr/bin/g++ -g -std=c++20 -Wall -Wextra -Wpedantic -o CMakeFiles/server.dir/src/server.cpp.o -c /home/illia/messenger/src/server.cpp",
+  "file": "/home/illia/messenger/src/server.cpp",
+  "output": "/home/illia/messenger/build/CMakeFiles/server.dir/src/server.cpp.o"
+}
+]

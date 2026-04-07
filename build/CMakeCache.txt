@@ -301,9 +301,9 @@ CMAKE_CACHEFILE_DIR:INTERNAL=/home/illia/messenger/build
 //Major version of cmake used to create the current loaded cache
 CMAKE_CACHE_MAJOR_VERSION:INTERNAL=4
 //Minor version of cmake used to create the current loaded cache
-CMAKE_CACHE_MINOR_VERSION:INTERNAL=2
+CMAKE_CACHE_MINOR_VERSION:INTERNAL=3
 //Patch version of cmake used to create the current loaded cache
-CMAKE_CACHE_PATCH_VERSION:INTERNAL=3
+CMAKE_CACHE_PATCH_VERSION:INTERNAL=1
 //Path to CMake executable.
 CMAKE_COMMAND:INTERNAL=/usr/bin/cmake
 //Path to cpack program executable.
@@ -432,7 +432,7 @@ FIND_PACKAGE_MESSAGE_DETAILS_OpenSSL:INTERNAL=[/usr/lib/libcrypto.so][/usr/inclu
 //Details about finding PkgConfig
 FIND_PACKAGE_MESSAGE_DETAILS_PkgConfig:INTERNAL=[/usr/bin/pkg-config][v2.5.1()]
 //Details about finding SQLite3
-FIND_PACKAGE_MESSAGE_DETAILS_SQLite3:INTERNAL=[/usr/lib/libsqlite3.so][/usr/include][v3.51.2()]
+FIND_PACKAGE_MESSAGE_DETAILS_SQLite3:INTERNAL=[/usr/lib/libsqlite3.so][/usr/include][v3.52.0()]
 //Details about finding Threads
 FIND_PACKAGE_MESSAGE_DETAILS_Threads:INTERNAL=[TRUE][v()]
 //Details about finding nlohmann_json
@@ -512,7 +512,7 @@ SODIUM_STATIC_LIBS:INTERNAL=
 SODIUM_STATIC_LIBS_L:INTERNAL=
 SODIUM_STATIC_LIBS_OTHER:INTERNAL=
 SODIUM_STATIC_LIBS_PATHS:INTERNAL=
-SODIUM_VERSION:INTERNAL=1.0.20
+SODIUM_VERSION:INTERNAL=1.0.21
 SODIUM_libsodium_INCLUDEDIR:INTERNAL=
 SODIUM_libsodium_LIBDIR:INTERNAL=
 SODIUM_libsodium_PREFIX:INTERNAL=
@@ -563,7 +563,7 @@ _OPENSSL_STATIC_LIBS:INTERNAL=
 _OPENSSL_STATIC_LIBS_L:INTERNAL=
 _OPENSSL_STATIC_LIBS_OTHER:INTERNAL=
 _OPENSSL_STATIC_LIBS_PATHS:INTERNAL=
-_OPENSSL_VERSION:INTERNAL=3.6.0
+_OPENSSL_VERSION:INTERNAL=3.6.1
 _OPENSSL_openssl_INCLUDEDIR:INTERNAL=
 _OPENSSL_openssl_LIBDIR:INTERNAL=
 _OPENSSL_openssl_PREFIX:INTERNAL=

@@ -194,7 +194,10 @@ void MessengerClient::sendMessageToPeer(const string& text) {
     j["timestamp"] = now;
 
     boost::system::error_code ec;
-    ws.write(asio::buffer(j.dump()), ec);
+    {   
+        std::lock_guard<mutex> lock(msg_mtx);
+        ws.write(asio::buffer(j.dump()), ec);
+    }
     if (ec) {
         cerr << "Send failed: " << ec.message() << endl;
     }
@@ -208,7 +211,7 @@ void MessengerClient::stop() {
 }
 
 
-int MessengerClient::popMessage(char* from, int from_len, char* to, int to_len, char* text, int text_len){
+int MessengerClient::popMessage(char* from, int from_len, char* to, int to_len, char* text, int text_len, int* isAudio){
     std::lock_guard<mutex> lk(message_mutex);
     if (message_queue.empty()) return 0;
     Message msg = message_queue.front();
@@ -217,8 +220,17 @@ int MessengerClient::popMessage(char* from, int from_len, char* to, int to_len, 
     strncpy(from, msg.from.c_str(), from_len-1);
     from[from_len-1] = '\0';
     strncpy(to, msg.to.c_str(), to_len-1);
-    strncpy(text, msg.message.c_str(), text_len-1);
-    text[text_len-1] = '\0';
+    to[to_len-1] = '\0';
+    if (msg.isAudio){
+        memcpy(text, msg.message.data(), min((size_t)text_len, msg.message.size()));
+    } else {
+        
+        size_t copy_len = min((size_t)text_len - 1, msg.message.size());
+        memcpy(text, msg.message.c_str(), copy_len);
+        text[copy_len] = '\0';
+    }
+    
+    *isAudio = msg.isAudio ? 1 : 0;
     return 1;
 }
 
@@ -239,6 +251,41 @@ void MessengerClient::register_client(string username, string password){
     if (ec) {
         cerr << "Send failed: " << ec.message() << endl;
     }
+}
+
+void MessengerClient::sendAudioToPeer(const std::vector<unsigned char>& audioData){
+    if (!connected || !log_status) return;
+    string cipher = encrypt_session(
+        string(audioData.begin(), audioData.end()),
+        session_key
+    );
+    json j;
+    j["type"] = "audio";
+    j["from"] = from_user;
+    j["to"] = to_user;
+    j["cipher"] = cipher;
+    j["timestamp"] = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()
+    ).count();
+
+    boost::system::error_code ec;
+    {   
+        std::lock_guard<mutex> lock(msg_mtx);
+        ws.write(asio::buffer(j.dump()), ec);
+    }
+    
+    if (ec) {
+        cerr << "Send failed: " << ec.message() << endl;
+    }
+}
+
+bool MessengerClient::getSize(int* from_size, int* to_size, int* msg_size){
+    if (message_queue.empty()) return false;
+    Message msg = message_queue.front();
+    *from_size = (int)msg.from.size()+1;
+    *to_size = (int)msg.to.size()+1;
+    *msg_size = (int)msg.message.size()+1;
+    return true;
 }
 
 //////////////////////////
@@ -379,11 +426,13 @@ void MessengerClient::readerLoop() {
                     memcpy(peer_public_keys[from].data(), pk.data(), PUBKEY_BYTES);
                     memcpy(peer_public.data(), pk.data(), PUBKEY_BYTES);
                 }
+                
             }
             {
                 std::lock_guard<std::mutex> sk(session_keys_mtx);
                 derive_session_key();
                 memcpy(session_keys[from].data(), session_key.data(), crypto_secretbox_KEYBYTES);
+
             }
 
             std::cerr << "[readerLoop] Stored and loaded public key for " << from << std::endl;
@@ -415,6 +464,8 @@ void MessengerClient::readerLoop() {
         }
         else if (j.contains("type") && j["type"] == "history"){
             try{
+                bool isAudio = false;
+                if (j.contains("flag") && j["flag"] == 1) isAudio = true;
                 string recipient = (j["from"] == from_user) ? j["to"] : j["from"];
                 std::cerr << "the recipient is " << recipient << endl;
                 if (has_pubkey(recipient)){
@@ -433,10 +484,9 @@ void MessengerClient::readerLoop() {
                     
                     
                     string decrypted = decrypt_session(j["cipher"].get<string>(), session_key);
-                    cerr << decrypted << endl;
                     {
                         lock_guard<mutex> lk(message_mutex);
-                        message_queue.push({j["from"], j["to"], decrypted});
+                        message_queue.push({j["from"], j["to"], decrypted, isAudio});
                     }
                 } else {
                     std::cerr << "No public key found " << std::endl;
@@ -449,8 +499,9 @@ void MessengerClient::readerLoop() {
 
         }
         else if (j.contains("cipher") && j.contains("from")) {
+            bool isAudio = false;
             std::string sender = j["from"].get<std::string>();
-
+            if (j.contains("type") && j["type"] == "audio") isAudio = true;
             if (!has_pubkey(sender)) {
                 std::cerr << "[readerLoop] cannot find public key for " << sender << std::endl;
                 continue;
@@ -460,13 +511,13 @@ void MessengerClient::readerLoop() {
 
             try {
                 std::string decrypted = decrypt_session(j["cipher"], session_key);
-
+                
                 {
                     lock_guard<mutex> lk(message_mutex);
-                    message_queue.push({sender, j["to"], decrypted});
+                    message_queue.push({sender, j["to"], decrypted, isAudio});
                 }
 
-                std::cout << "[MESSAGE] " << sender << ": " << decrypted << std::endl;
+                //std::cout << "[MESSAGE] " << sender << ": " << decrypted << std::endl;
             } catch (const std::exception& e) {
                 std::cerr << "[readerLoop] Decryption error: "
                           << e.what() << std::endl;

@@ -26,6 +26,7 @@ struct Message{
   std::string from;
   std::string to;
   std::string message;
+  bool isAudio;
 };
 
 constexpr size_t PUBKEY_BYTES = 32;    // crypto_box_PUBLICKEYBYTES
@@ -61,18 +62,21 @@ public:
     // Stop client (closes connection)
     void stop();
 
-    int popMessage(char* from, int from_len, char* to, int to_len, char* text, int text_len);
+    int popMessage(char* from, int from_len, char* to, int to_len, char* text, int text_len, int* isAudio);
 
     void login(std::string username, std::string password);
 
     void relogin();
 
+    bool getSize(int* from_size, int* to_size, int* msg_size);
 
     bool getLogStatus(){
       return log_status;
     }
 
     void register_client(std::string username, std::string password);
+
+    void sendAudioToPeer(const std::vector<unsigned char>& audioData);
     
 private:
 
@@ -89,6 +93,7 @@ private:
     bool session_ready = false;
     std::mutex peer_key_mtx;
     std::mutex session_keys_mtx;
+    std::mutex msg_mtx;
     bool log_status = false;
 
     // Boost.Asio context

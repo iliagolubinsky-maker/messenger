@@ -58,9 +58,9 @@ DLL_EXPORT void client_destroy(ClientWrapper* wrapper) {
     delete wrapper;
 }
 
-DLL_EXPORT int client_pop_message(ClientWrapper* wrapper, char* from, int from_len, char* to, int to_len, char* text, int text_len){
+DLL_EXPORT int client_pop_message(ClientWrapper* wrapper, char* from, int from_len, char* to, int to_len, char* text, int text_len, int* isAudio){
     if (!wrapper) return 0;
-    return wrapper->client->popMessage(from, from_len, to, to_len, text, text_len);
+    return wrapper->client->popMessage(from, from_len, to, to_len, text, text_len, isAudio);
 }
 
 DLL_EXPORT void client_login(ClientWrapper* wrapper, const char* username, const char* password){
@@ -78,6 +78,19 @@ DLL_EXPORT void client_register(ClientWrapper* wrapper, const char* username, co
     return wrapper->client->register_client(username, password);
 }
 
+DLL_EXPORT void client_send_binary(ClientWrapper* wrapper, unsigned char* data, int len) {
+    if (wrapper && wrapper->client) {
+        std::vector<unsigned char> vec(data, data + len);
+        wrapper->client->sendAudioToPeer(vec);
+    }
+}
+
+DLL_EXPORT bool client_get_size(ClientWrapper* wrapper, int* from_size, int* to_size, int* msg_size){
+    if (wrapper && wrapper->client) {
+        return wrapper->client->getSize(from_size, to_size, msg_size);
+        
+    }
+}
 
 
 

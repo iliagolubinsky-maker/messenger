@@ -144,8 +144,11 @@ private:
 
             }
             else if(j.contains("to") && j.contains("cipher") && j.contains("from") && j.contains("timestamp")) {
-                storeMessages(j["from"], j["to"], j["cipher"], j["timestamp"]);
+                bool isAudio = false;
+                if (j.contains("type") && j["type"] == "audio") isAudio = true;
+                storeMessages(j["from"], j["to"], j["cipher"], j["timestamp"], isAudio);
                 string to = j["to"];
+                //cerr << j["cipher"] <<endl;
                 if (sessionExists(to) == true) {
                     shared_ptr<Wsession> peer;
                     {
@@ -156,7 +159,7 @@ private:
                     if(peer) {
                         peer->sendMessage(data);
                     } else {
-                        storeUnsentMessages(to, data, j["timestamp"]);
+                        storeUnsentMessages(to, data, isAudio, j["timestamp"]);
                     }
                 }
                 
@@ -249,13 +252,14 @@ private:
         }
     }
 
-    void storeUnsentMessages(const std::string& session_id, const std::string& message, long long timestamp) {
-        const char* sql = "INSERT INTO unsent_messages (session_id, message, timestamp) VALUES (?, ?, ?);";
+    void storeUnsentMessages(const std::string& session_id, const std::string& message, long long timestamp, bool isAudio) {
+        const char* sql = "INSERT INTO unsent_messages (session_id, message, timestamp, isAudio) VALUES (?, ?, ?, ?);";
         sqlite3_stmt* stmt;
         if(sqlite3_prepare_v2(unsent_messages_db, sql, -1, &stmt, nullptr) != SQLITE_OK) return;
         sqlite3_bind_text(stmt, 1, session_id.c_str(), -1, SQLITE_STATIC);
         sqlite3_bind_text(stmt, 2, message.c_str(), -1, SQLITE_STATIC);
         sqlite3_bind_int64(stmt, 3, timestamp);
+        sqlite3_bind_int(stmt, 4, isAudio ? 1 : 0);
         sqlite3_step(stmt);
         sqlite3_finalize(stmt);
     }
@@ -276,7 +280,7 @@ private:
             sqlite3_finalize(key_stmt);
         }
 
-        const char* msg_sql = "SELECT sender, receiver, cipher, timestamp FROM chat_history "
+        const char* msg_sql = "SELECT sender, receiver, cipher, timestamp, isAudio FROM chat_history "
                             "WHERE sender = ? OR receiver = ? ORDER BY timestamp ASC;";
         sqlite3_stmt* msg_stmt;
         if (sqlite3_prepare_v2(chat_history, msg_sql, -1, &msg_stmt, nullptr) == SQLITE_OK) {
@@ -285,6 +289,7 @@ private:
             while (sqlite3_step(msg_stmt) == SQLITE_ROW) {
                 json j;
                 j["type"] = "history";
+                j["flag"] = sqlite3_column_int(msg_stmt, 4);
                 j["from"] = reinterpret_cast<const char*>(sqlite3_column_text(msg_stmt, 0));
                 j["to"] = reinterpret_cast<const char*>(sqlite3_column_text(msg_stmt, 1));
                 j["cipher"] = reinterpret_cast<const char*>(sqlite3_column_text(msg_stmt, 2));
@@ -295,9 +300,9 @@ private:
         }
     }
 
-    void storeMessages(const string& from, const string& to, const string& cipher, long long timestamp){
+    void storeMessages(const string& from, const string& to, const string& cipher, long long timestamp, const bool isAudio){
             
-        const char* sql = "INSERT INTO chat_history (sender, receiver, cipher, timestamp) VALUES (?, ?, ?, ?);";
+        const char* sql = "INSERT INTO chat_history (sender, receiver, cipher, timestamp, isAudio) VALUES (?, ?, ?, ?, ?);";
 
         sqlite3_stmt* stmt;
         if (sqlite3_prepare_v2(chat_history, sql, -1, &stmt, nullptr) != SQLITE_OK) return;
@@ -306,6 +311,7 @@ private:
         sqlite3_bind_text(stmt, 2, to.c_str(), -1, SQLITE_STATIC);
         sqlite3_bind_text(stmt, 3, cipher.c_str(), -1, SQLITE_STATIC);
         sqlite3_bind_int64(stmt, 4, timestamp);
+        sqlite3_bind_int(stmt, 5, isAudio ? 1 : 0);
 
         sqlite3_step(stmt);
         sqlite3_finalize(stmt);
@@ -546,8 +552,8 @@ int main() {
         const char *sql_sessions = "CREATE TABLE IF NOT EXISTS sessions (session_id TEXT PRIMARY KEY, pubkey TEXT NOT NULL)";
         const char *sql_create = "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE NOT NULL, password_hash TEXT NOT NULL, created_at INTEGER NOT NULL, last_login INTEGER, failed_attempts INTEGER DEFAULT 0, locked_until INTEGER DEFAULT 0)";
         const char *pass_reset = "CREATE TABLE IF NOT EXISTS password_token (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL,token_hash TEXT NOT NULL,  expires_at INTEGER NOT NULL, used INTEGER DEFAULT 0, FOREIGN KEY(user_id) REFERENCES users(id))";
-        const char* msg_sess = "CREATE TABLE IF NOT EXISTS unsent_messages ( id INTEGER PRIMARY KEY AUTOINCREMENT, session_id TEXT NOT NULL, message TEXT NOT NULL, timestamp INTEGER NOT NULL)";
-        const char* cht_hstr = "CREATE TABLE IF NOT EXISTS chat_history ( id INTEGER PRIMARY KEY AUTOINCREMENT, sender TEXT NOT NULL, receiver TEXT NOT NULL, cipher TEXT NOT NULL, timestamp INTEGER NOT NULL);";
+        const char* msg_sess = "CREATE TABLE IF NOT EXISTS unsent_messages ( id INTEGER PRIMARY KEY AUTOINCREMENT, session_id TEXT NOT NULL, message TEXT NOT NULL, timestamp INTEGER NOT NULL, isAudio INTEGER NOT NULL)";
+        const char* cht_hstr = "CREATE TABLE IF NOT EXISTS chat_history ( id INTEGER PRIMARY KEY AUTOINCREMENT, sender TEXT NOT NULL, receiver TEXT NOT NULL, cipher TEXT NOT NULL, timestamp INTEGER NOT NULL, isAudio INTEGER NOT NULL);";
         char *errMsg = nullptr;
         rc = sqlite3_exec(db, sql_sessions, 0, 0, &errMsg);
         ld = sqlite3_exec(pd, sql_create, 0, 0, &errMsg);

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'RecorderService.dart';
 import 'dart:async';
 import 'messenger_ffi.dart';
 import '../main.dart';
+import 'dart:typed_data';
 
 class MessengerController {
   static final MessengerController _instance = MessengerController._internal();
@@ -18,23 +20,35 @@ class MessengerController {
   bool _initialized = false;
 
   void init(String from) {
-    // if (_initialized) return;
     _myUsername = from;
     _ffiClient = MessengerFFI(from);
     _ffiClient.start();
 
-    _ffiClient.onMessage = (String fromUser, String toUser, String text) {
-      final String peer = (fromUser == _myUsername) ? toUser : fromUser;
-      _ensureChat(peer);
-      final chat = chats[peer]!;
-      final bool isMe = (fromUser == _myUsername);
-      chat.messages.add(Message(text, isMe));
-      chat.lastMessage = text;
-      chat.time = _now();
-      _updateController.add(null);
-    };
+    _ffiClient.onMessage =
+        (
+          String from,
+          String to,
+          String text,
+          bool isAudio,
+          Uint8List audioBytes,
+        ) {
+          final String peer = (from == _myUsername) ? to : from;
+          _ensureChat(peer);
 
-    _initialized = true;
+          final chat = chats[peer]!;
+
+          chat.messages.add(
+            Message(
+              text,
+              from == _myUsername,
+              isAudio: isAudio,
+              audioBytes: isAudio ? audioBytes : null,
+            ),
+          );
+
+          chat.lastMessage = isAudio ? "🎤 Voice message" : text;
+          _updateController.add(null);
+        };
   }
 
   void register(String username, String password) {
@@ -44,6 +58,7 @@ class MessengerController {
   void addChat(String username) {
     _ensureChat(username);
     changeRecipient(username);
+    _updateController.add(null);
   }
 
   void changeRecipient(String to) {
@@ -59,6 +74,7 @@ class MessengerController {
     if (_currentRecipient == null) return;
     final chat = chats[_currentRecipient]!;
     chat.messages.add(Message(text, true));
+
     chat.lastMessage = text;
     chat.time = _now();
     _ffiClient.send(text);
@@ -91,5 +107,21 @@ class MessengerController {
     _initialized = false;
     _currentRecipient = null;
     chats.clear();
+  }
+
+  void sendAudioMessage(Uint8List audioBytes) {
+    if (_currentRecipient == null) return;
+
+    final chat = chats[_currentRecipient];
+
+    if (chat != null) {
+      chat.messages.add(
+        Message("", true, isAudio: true, audioBytes: audioBytes),
+      );
+      chat.lastMessage = "🎤 Voice message";
+      chat.time = _now();
+      _ffiClient.sendBinary(audioBytes);
+      _updateController.add(null);
+    }
   }
 }

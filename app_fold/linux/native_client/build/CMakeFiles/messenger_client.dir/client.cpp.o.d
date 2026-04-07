@@ -448,7 +448,8 @@ CMakeFiles/messenger_client.dir/client.cpp.o: \
  /usr/include/bits/types/struct_statx_timestamp.h \
  /usr/include/bits/types/struct_statx.h /usr/include/fcntl.h \
  /usr/include/bits/fcntl.h /usr/include/bits/fcntl-linux.h \
- /usr/include/linux/falloc.h /usr/include/sys/eventfd.h \
+ /usr/include/linux/falloc.h /usr/include/linux/openat2.h \
+ /usr/include/bits/openat2.h /usr/include/sys/eventfd.h \
  /usr/include/bits/eventfd.h \
  /usr/local/include/boost/asio/detail/socket_types.hpp \
  /usr/include/sys/ioctl.h /usr/include/bits/ioctls.h \
@@ -1501,6 +1502,7 @@ CMakeFiles/messenger_client.dir/client.cpp.o: \
  /usr/include/sodium/crypto_box_curve25519xsalsa20poly1305.h \
  /usr/include/sodium/crypto_core_hchacha20.h \
  /usr/include/sodium/crypto_core_hsalsa20.h \
+ /usr/include/sodium/crypto_core_keccak1600.h \
  /usr/include/sodium/crypto_core_salsa20.h \
  /usr/include/sodium/crypto_core_salsa2012.h \
  /usr/include/sodium/crypto_core_salsa208.h \
@@ -1510,7 +1512,7 @@ CMakeFiles/messenger_client.dir/client.cpp.o: \
  /usr/include/sodium/crypto_hash.h \
  /usr/include/sodium/crypto_hash_sha256.h \
  /usr/include/sodium/crypto_hash_sha512.h \
- /usr/include/sodium/crypto_kdf.h \
+ /usr/include/sodium/crypto_ipcrypt.h /usr/include/sodium/crypto_kdf.h \
  /usr/include/sodium/crypto_kdf_blake2b.h \
  /usr/include/sodium/crypto_kdf_hkdf_sha256.h \
  /usr/include/sodium/crypto_kdf.h \
@@ -1545,7 +1547,12 @@ CMakeFiles/messenger_client.dir/client.cpp.o: \
  /usr/include/sodium/crypto_stream_xsalsa20.h \
  /usr/include/sodium/crypto_verify_16.h \
  /usr/include/sodium/crypto_verify_32.h \
- /usr/include/sodium/crypto_verify_64.h /usr/include/sodium/randombytes.h \
+ /usr/include/sodium/crypto_verify_64.h \
+ /usr/include/sodium/crypto_xof_shake128.h \
+ /usr/include/sodium/crypto_xof_shake256.h \
+ /usr/include/sodium/crypto_xof_turboshake128.h \
+ /usr/include/sodium/crypto_xof_turboshake256.h \
+ /usr/include/sodium/randombytes.h \
  /usr/include/sodium/randombytes_internal_random.h \
  /usr/include/sodium/randombytes.h \
  /usr/include/sodium/randombytes_sysrandom.h \

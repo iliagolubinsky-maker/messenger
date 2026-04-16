@@ -22,11 +22,14 @@
 #include <unordered_map>
 #include <queue>
 using namespace std;
+using json = nlohmann::json;
 struct Message{
   std::string from;
   std::string to;
   std::string message;
+  std::string type;
   bool isAudio;
+  bool isOffer;
 };
 
 constexpr size_t PUBKEY_BYTES = 32;    // crypto_box_PUBLICKEYBYTES
@@ -57,26 +60,30 @@ public:
     void start();
 
     // Send a text message to the peer
-    void sendMessageToPeer(const std::string& text);
+    void send_message_to_peer(const string& type, const std::string& text);
 
     // Stop client (closes connection)
     void stop();
 
-    int popMessage(char* from, int from_len, char* to, int to_len, char* text, int text_len, int* isAudio);
+    int pop_message(char* from, int from_len, char* to, int to_len, char* text, int text_len, char* type, int type_len, int* isAudio);
 
     void login(std::string username, std::string password);
 
     void relogin();
 
-    bool getSize(int* from_size, int* to_size, int* msg_size);
+    bool get_size(int* from_size, int* to_size, int* msg_size, int* type_size);
 
-    bool getLogStatus(){
+    bool get_log_status(){
       return log_status;
     }
 
     void register_client(std::string username, std::string password);
 
-    void sendAudioToPeer(const std::vector<unsigned char>& audioData);
+    void send_audio_to_peer(const std::vector<unsigned char>& audioData);
+
+    void send_call_req(const std::string& sdp);
+
+    void send_json(json payload);
     
 private:
 
@@ -112,15 +119,14 @@ private:
 
     bool peer_key_received;
     bool connected;
-
     // Internal methods
     bool change_pubkey(const std::string& to);
     void connect();
     void register_pubkey();
-    void readerLoop();
+    void reader_loop();
     bool loadKey(const std::string& filename);
-    bool savePrivateKey(const std::string& filename, const unsigned char priv[PRIVKEY_BYTES]);
-    void sendPublicKey();
+    bool save_private_key(const std::string& filename, const unsigned char priv[PRIVKEY_BYTES]);
+    void send_public_key();
     bool has_pubkey(const std::string& user);
     void derive_session_key();
 

@@ -1,7 +1,8 @@
 #include "client.hpp"
 #include <stdexcept>
 #include <iostream>
-
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
 #ifdef _WIN32
   #define DLL_EXPORT __declspec(dllexport)
 #else
@@ -41,8 +42,9 @@ DLL_EXPORT void client_change_recipient(ClientWrapper* wrapper, const char* to){
     if (wrapper && wrapper->client) wrapper->client->change_recipient(to);
 }
 
-DLL_EXPORT void client_send(ClientWrapper* wrapper, const char* message) {
-    if (wrapper && wrapper->client) wrapper->client->sendMessageToPeer(message);
+DLL_EXPORT void client_send(ClientWrapper* wrapper, const char* type, const char* message) {
+    
+    if (wrapper && wrapper->client) wrapper->client->send_message_to_peer(type, message);
 }
 
 DLL_EXPORT void client_stop(ClientWrapper* wrapper) {
@@ -58,9 +60,9 @@ DLL_EXPORT void client_destroy(ClientWrapper* wrapper) {
     delete wrapper;
 }
 
-DLL_EXPORT int client_pop_message(ClientWrapper* wrapper, char* from, int from_len, char* to, int to_len, char* text, int text_len, int* isAudio){
+DLL_EXPORT int client_pop_message(ClientWrapper* wrapper, char* from, int from_len, char* to, int to_len, char* text, int text_len, char* type, int type_len, int* isAudio){
     if (!wrapper) return 0;
-    return wrapper->client->popMessage(from, from_len, to, to_len, text, text_len, isAudio);
+    return wrapper->client->pop_message(from, from_len, to, to_len, text, text_len, type, type_len, isAudio);
 }
 
 DLL_EXPORT void client_login(ClientWrapper* wrapper, const char* username, const char* password){
@@ -70,7 +72,7 @@ DLL_EXPORT void client_login(ClientWrapper* wrapper, const char* username, const
 
 DLL_EXPORT bool client_get_log_status(ClientWrapper* wrapper){
     if (!wrapper) return false;
-    return wrapper->client->getLogStatus();
+    return wrapper->client->get_log_status();
 }
 
 DLL_EXPORT void client_register(ClientWrapper* wrapper, const char* username, const char* password){
@@ -81,13 +83,25 @@ DLL_EXPORT void client_register(ClientWrapper* wrapper, const char* username, co
 DLL_EXPORT void client_send_binary(ClientWrapper* wrapper, unsigned char* data, int len) {
     if (wrapper && wrapper->client) {
         std::vector<unsigned char> vec(data, data + len);
-        wrapper->client->sendAudioToPeer(vec);
+        wrapper->client->send_audio_to_peer(vec);
     }
 }
 
-DLL_EXPORT bool client_get_size(ClientWrapper* wrapper, int* from_size, int* to_size, int* msg_size){
+DLL_EXPORT bool client_get_size(ClientWrapper* wrapper, int* from_size, int* to_size, int* msg_size, int* type_size){
     if (wrapper && wrapper->client) {
-        return wrapper->client->getSize(from_size, to_size, msg_size);
+        return wrapper->client->get_size(from_size, to_size, msg_size, type_size);
+    }
+    return false;
+}
+
+DLL_EXPORT void client_send_json(ClientWrapper* wrapper, const char* payload){
+    if (wrapper && wrapper->client) {
+        try{
+            auto j = json::parse(payload);
+            wrapper->client->send_json(j.dump());
+        } catch(const exception& e){
+            cerr<<"FFI Error"<<endl;
+        }
         
     }
 }

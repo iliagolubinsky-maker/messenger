@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:async';
 import 'package:ffi/ffi.dart';
 import 'dart:typed_data';
+import 'dart:convert';
 
 /// -------------------- FFI TYPEDEFS -------------------- ///
 
@@ -14,8 +15,10 @@ typedef ClientCreateDart = Pointer<Void> Function(Pointer<Utf8>);
 typedef ClientStartC = Void Function(Pointer<Void>);
 typedef ClientStartDart = void Function(Pointer<Void>);
 
-typedef ClientSendC = Void Function(Pointer<Void>, Pointer<Utf8>);
-typedef ClientSendDart = void Function(Pointer<Void>, Pointer<Utf8>);
+typedef ClientSendC =
+    Void Function(Pointer<Void>, Pointer<Utf8>, Pointer<Utf8>);
+typedef ClientSendDart =
+    void Function(Pointer<Void>, Pointer<Utf8>, Pointer<Utf8>);
 
 typedef ClientStopC = Void Function(Pointer<Void>);
 typedef ClientStopDart = void Function(Pointer<Void>);
@@ -44,11 +47,15 @@ typedef ClientPopMessageC =
       Int32,
       Pointer<Utf8>,
       Int32,
+      Pointer<Utf8>,
+      Int32,
       Pointer<Int32>,
     );
 typedef ClientPopMessageDart =
     int Function(
       Pointer<Void>,
+      Pointer<Utf8>,
+      int,
       Pointer<Utf8>,
       int,
       Pointer<Utf8>,
@@ -72,6 +79,7 @@ typedef ClientGetSizeC =
       Pointer<Int32>,
       Pointer<Int32>,
       Pointer<Int32>,
+      Pointer<Int32>,
     );
 
 typedef ClientGetSizeDart =
@@ -80,7 +88,11 @@ typedef ClientGetSizeDart =
       Pointer<Int32>,
       Pointer<Int32>,
       Pointer<Int32>,
+      Pointer<Int32>,
     );
+
+typedef ClientSendJsonC = Void Function(Pointer<Void>, Pointer<Utf8>);
+typedef ClientSendJsonDart = void Function(Pointer<Void>, Pointer<Utf8>);
 
 /// -------------------- MESSENGER FFI CLASS -------------------- ///
 
@@ -100,12 +112,14 @@ class MessengerFFI {
   late ClientRegisterDart _clientRegister;
   late ClientSendBinaryDart _clientSendBinary;
   late ClientGetSizeDart _clientGetSize;
+  late ClientSendJsonDart _clientSendJson;
   Timer? _pollTimer;
 
   final isAudio_buf = malloc.allocate<Int32>(1);
 
   /// Dart callback for incoming messages
   void Function(
+    String type,
     String from,
     String to,
     String text,
@@ -164,6 +178,10 @@ class MessengerFFI {
       "client_get_size",
     );
 
+    _clientSendJson = _lib.lookupFunction<ClientSendJsonC, ClientSendJsonDart>(
+      "client_send_json",
+    );
+
     // Create the client
     final fromPtr = from.toNativeUtf8();
     _client = _clientCreate(fromPtr);
@@ -204,18 +222,28 @@ class MessengerFFI {
 
   void popMessages() {
     final fromSizePtr = malloc.allocate<Int32>(1);
+    final typeSizePtr = malloc.allocate<Int32>(1);
     final toSizePtr = malloc.allocate<Int32>(1);
     final msgSizePtr = malloc.allocate<Int32>(1);
 
     try {
-      while (_clientGetSize(_client, fromSizePtr, toSizePtr, msgSizePtr)) {
+      while (_clientGetSize(
+        _client,
+        fromSizePtr,
+        toSizePtr,
+        msgSizePtr,
+        typeSizePtr,
+      )) {
         final fromBuf = malloc.allocate<Uint8>(fromSizePtr.value);
+        final typeBuf = malloc.allocate<Uint8>(typeSizePtr.value);
         final toBuf = malloc.allocate<Uint8>(toSizePtr.value);
         final msgBuf = malloc.allocate<Uint8>(msgSizePtr.value);
 
         try {
           if (_clientPop(
                 _client,
+                typeBuf.cast<Utf8>(),
+                typeSizePtr.value,
                 fromBuf.cast<Utf8>(),
                 fromSizePtr.value,
                 toBuf.cast<Utf8>(),
@@ -228,6 +256,7 @@ class MessengerFFI {
             final from = fromBuf.cast<Utf8>().toDartString();
             final to = toBuf.cast<Utf8>().toDartString();
             final bool isAudio = isAudio_buf.value != 0;
+            final type = typeBuf.cast<Utf8>().toDartString();
 
             if (isAudio) {
               final int audioDataSize = msgSizePtr.value - 1;
@@ -235,10 +264,17 @@ class MessengerFFI {
                 msgBuf.asTypedList(audioDataSize),
               );
 
-              onMessage?.call(from, to, "Voice Message", true, audioBytes);
+              onMessage?.call(
+                type,
+                from,
+                to,
+                "Voice Message",
+                true,
+                audioBytes,
+              );
             } else {
               final messageText = msgBuf.cast<Utf8>().toDartString();
-              onMessage?.call(from, to, messageText, false, Uint8List(0));
+              onMessage?.call(type, from, to, messageText, false, Uint8List(0));
             }
           }
         } finally {
@@ -258,10 +294,12 @@ class MessengerFFI {
   void start() => _clientStart(_client);
 
   /// Send a message
-  void send(String message) {
+  void send(String type, String message) {
     final msgPtr = message.toNativeUtf8();
-    _clientSend(_client, msgPtr);
+    final typePtr = type.toNativeUtf8();
+    _clientSend(_client, typePtr, msgPtr);
     malloc.free(msgPtr);
+    malloc.free(typePtr);
   }
 
   /// Stop client
@@ -283,5 +321,15 @@ class MessengerFFI {
     nativeBytes.setAll(0, data);
     _clientSendBinary(_client, ptr, data.length);
     malloc.free(ptr);
+  }
+
+  void sendJson(Map<String, dynamic> data) {
+    final String jsonString = jsonEncode(data);
+    final Pointer<Utf8> jsonPtr = jsonString.toNativeUtf8();
+    try {
+      _clientSendJson(_client, jsonPtr);
+    } finally {
+      malloc.free(jsonPtr);
+    }
   }
 }
